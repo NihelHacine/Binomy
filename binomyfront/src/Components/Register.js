@@ -1,10 +1,70 @@
 import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
+import { useState } from 'react';
+import Swal from 'sweetalert2';
+import axios from 'axios';
 
 export default function Register() {
+  const [newuser, setnewuser] = useState({
+    "nom": "",
+    "prenom" :"",
+    "cin":"",
+    "tel":"",
+    "email":"",
+    "password":"",
+    "gouvernorat":"",
+    "adresse":"",
+    "code_postal":"",
+    "about":"",
+    "photo":"",
+    "role":""
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    const formData = new FormData();
+    formData.append("nom", newuser.nom);
+    formData.append("prenom", newuser.prenom);
+    formData.append("cin", newuser.cin);
+    formData.append("tel", newuser.tel);
+    formData.append("email", newuser.email);
+    formData.append("password", newuser.password);
+    formData.append("gouvernorat", newuser.gouvernorat);
+    formData.append("adresse", newuser.adresse);
+    formData.append("code_postal", newuser.code_postal);
+    formData.append("about", newuser.about);
+    formData.append("photo", newuser.photo);
+    formData.append("role", newuser.role);
+  
+    try {
+      const result = await axios.post("http://localhost:5000/user/register", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      Swal.fire({
+        title: "Bien fait!",
+        text: "Votre demande d'inscription a été envoyée à l'administrateur!",
+        icon: "success"
+      }).then(() => {
+        window.location.reload(); // recharge la page
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Erreur!",
+        text: error?.response?.data?.msg || "Une erreur s'est produite.",
+        icon: "error"
+      });
+    }
+  };
+  
+
+  
+
   return (
     <div className="isolate bg-gradient-to-tr from-blue-300 to-transparent px-6 py-24 sm:py-32 lg:px-8">
-    <form style={{width:'70%',margin:'0 auto',padding:'3%'}}> 
+    <form style={{width:'70%',margin:'0 auto',padding:'3%'}}  onSubmit={handleSubmit}> 
       <div className="space-y-12">
         <div className="border-b border-gray-900/10 pb-12">
           <h2 className="text-base/7 font-semibold text-gray-900">Devenir membre</h2>
@@ -26,10 +86,12 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   id="first-name"
-                  name="first-name"
+                  name="prenom"
                   type="text"
                   autoComplete="given-name"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,prenom:e.target.value})}
+                  required
                 />
               </div>
             </div>
@@ -41,10 +103,11 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   id="last-name"
-                  name="last-name"
+                  name="nom"
                   type="text"
                   autoComplete="family-name"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,nom:e.target.value})} required
                 />
               </div>
             </div>
@@ -56,10 +119,11 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   id="last-name"
-                  name="last-name"
+                  name="cin"
                   type="number"
                   autoComplete="family-name"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,cin:e.target.value})} required
                 />
               </div>
             </div>
@@ -70,12 +134,35 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   id="last-name"
-                  name="last-name"
+                  name="tel"
                   type="number"
                   autoComplete="family-name"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,tel:e.target.value})} required
                 />
               </div>
+              <div className="sm:col-span-3">
+              <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
+                Gouvernerat
+              </label>
+              <div className="mt-2 grid grid-cols-1">
+                <select
+                  id="role"
+                  name="role"
+                  autoComplete="role"
+                  className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,role:e.target.value})} required
+                >
+                 <option value="" disabled selected>-- Choisissez un rôle --</option>
+                <option value="etudiant">Étudiant</option>
+                <option value="bailleur">Bailleur</option>
+                </select>
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                />
+              </div>
+            </div>
             </div>
             <div className="sm:col-span-4">
               <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
@@ -88,45 +175,47 @@ export default function Register() {
                   type="email"
                   autoComplete="email"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,email:e.target.value})} required
                 />
               </div>
             </div>
 
             <div className="sm:col-span-3">
               <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
-                Gouvernerat
+                Gouvernorat
               </label>
               <div className="mt-2 grid grid-cols-1">
                 <select
-                  id="country"
-                  name="country"
+                  id="gouvernorat"
+                  name="gouvernorat"
                   autoComplete="country-name"
                   className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,gouvernorat:e.target.value})} required
                 >
-                  <option>Tunis</option>
-                  <option>Ben Arous</option>
-                  <option>Ariana</option>
-                  <option>Mannouba</option>
-                  <option>Nabeul</option>
-                  <option>Monastir</option>
-                  <option>Mednine</option>
-                  <option>Bizerte</option>
-                  <option>Gabes</option>
-                  <option>Beja</option>
-                  <option>Tataouinr</option>
-                  <option>Zaghouan</option>
-                  <option>Kasserine</option>
-                  <option>Jendouba</option>
-                  <option>Siliana</option>
-                  <option>Sidi Bouzid</option>
-                  <option>Kef</option>
-                  <option>Kairouan</option>
-                  <option>Mahdia</option>
-                  <option>Gafsa</option>
-                  <option>Tozeur</option>
-                  <option>Gbelli</option>
-                  <option>Sfax</option>
-                  <option>Mahdia</option>
+                  <option value="" disabled selected>-- Choisissez votre gouvernorat --</option>
+                  <option value="Tunis">Tunis</option>
+                  <option value="Ben Arous">Ben Arous</option>
+                  <option value="Ariana">Ariana</option>
+                  <option value="Mannouba">Mannouba</option>
+                  <option value="Nabeul">Nabeul</option>
+                  <option value="Monastir">Monastir</option>
+                  <option value="Mednine">Mednine</option>
+                  <option value="Bizerte">Bizerte</option>
+                  <option value="Gabes">Gabes</option>
+                  <option value="Beja">Beja</option>
+                  <option value="Tataouine">Tataouine</option> {/* corrigé de "Tataouinr" */}
+                  <option value="Zaghouan">Zaghouan</option>
+                  <option value="Kasserine">Kasserine</option>
+                  <option value="Jendouba">Jendouba</option>
+                  <option value="Siliana">Siliana</option>
+                  <option value="Sidi Bouzid">Sidi Bouzid</option>
+                  <option value="Kef">Kef</option>
+                  <option value="Kairouan">Kairouan</option>
+                  <option value="Mahdia">Mahdia</option>
+                  <option value="Gafsa">Gafsa</option>
+                  <option value="Tozeur">Tozeur</option>
+                  <option value="Gbelli">Gbelli</option>
+                  <option value="Sfax">Sfax</option>
 
                 </select>
                 <ChevronDownIcon
@@ -143,10 +232,11 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   id="street-address"
-                  name="street-address"
+                  name="adresse"
                   type="text"
                   autoComplete="street-address"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,adresse:e.target.value})} required
                 />
               </div>
             </div>
@@ -160,10 +250,11 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   id="postal-code"
-                  name="postal-code"
-                  type="text"
+                  name="code_postal"
+                  type="number"
                   autoComplete="postal-code"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,code_postal:e.target.value})} required
                 />
               </div>
             </div>
@@ -174,10 +265,11 @@ export default function Register() {
               <div className="mt-2">
                 <input
                   id="street-address"
-                  name="street-address"
+                  name="password"
                   type="password"
                   autoComplete="street-address"
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,password:e.target.value})} required
                 />
               </div>
             </div>  
@@ -198,6 +290,7 @@ export default function Register() {
                   rows={3}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   defaultValue={''}
+                  onChange={(e)=>setnewuser({...newuser,about:e.target.value})} required
                 />
               </div>
               <p className="mt-3 text-sm/6 text-gray-600">Écris quelques phrases sur toi.</p>
@@ -209,7 +302,7 @@ export default function Register() {
 
 <div className="col-span-full">
   <label htmlFor="cover-photo" className="block text-sm/6 font-medium text-gray-900">
-    Photo
+  Télécharger une photo
   </label>
   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
     <div className="text-center">
@@ -219,12 +312,12 @@ export default function Register() {
           htmlFor="file-upload"
           className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
         >
-          <span>Télécharger une photo</span>
-          <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+         
+          <input id="file-upload" name="photo" type="file"  accept="image/*" required onChange={(e)=>setnewuser({...newuser,photo:e.target.files[0]})}/>
         </label>
        
       </div>
-      <p className="text-xs/5 text-gray-600">PNG, JPG, GIF 
+      <p className="text-xs/5 text-gray-600">PNG, JPG, JPEG
       </p>
     </div>
   </div>
@@ -232,7 +325,7 @@ export default function Register() {
 </div>
 
       <div className="mt-6 flex items-center justify-end gap-x-6">
-        <button type="button" className="text-sm/6 font-semibold text-gray-900">
+        <button type="reset" className="text-sm/6 font-semibold text-gray-900">
           Annuler
         </button>
         <button

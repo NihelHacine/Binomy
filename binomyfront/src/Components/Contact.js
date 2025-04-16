@@ -1,11 +1,39 @@
 'use client'
 
-import { useState } from 'react'
-import { ChevronDownIcon } from '@heroicons/react/16/solid'
-import { Field, Label, Switch } from '@headlessui/react'
+import { useRef, useState } from 'react'
+import Swal from 'sweetalert2';
+import emailjs from '@emailjs/browser';
 
 export default function Example() {
   const [agreed, setAgreed] = useState(false)
+  const form = useRef();
+
+  const sendEmail = (e) => {
+    e.preventDefault();
+
+    emailjs
+      .sendForm('service_75u9cmp', 'template_d67uqel', form.current, {
+        publicKey: '7InAQW5TO_m6eP9bJ',
+      })
+      .then(
+        () => {
+          console.log('SUCCESS!');
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "Votre email a été bien envoyé",
+            showConfirmButton: false,
+          });
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        },
+        (error) => {
+          console.log('FAILED...', error.text);
+        },
+      );
+  };
+
 
   return (
     <div className="isolate bg-gradient-to-tr from-blue-300 to-transparent px-6 py-24 sm:py-32 lg:px-8">
@@ -24,36 +52,23 @@ export default function Example() {
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-5xl">Contactez nous!</h2>
       </div>
-      <form action="#" method="POST" className="mx-auto mt-16 max-w-xl sm:mt-20">
+      <form ref={form} onSubmit={sendEmail} className="mx-auto mt-16 max-w-xl sm:mt-20">
         <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-          <div>
+          <div className="sm:col-span-2">
             <label htmlFor="first-name" className="block text-sm/6 font-semibold text-gray-900">
-              Votre Prénom
+              Votre nom complet
             </label>
             <div className="mt-2.5">
               <input
                 id="first-name"
-                name="first-name"
+                name="from_name"
                 type="text"
                 autoComplete="given-name"
                 className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
               />
             </div>
           </div>
-          <div>
-            <label htmlFor="last-name" className="block text-sm/6 font-semibold text-gray-900">
-             Votre nom
-            </label>
-            <div className="mt-2.5">
-              <input
-                id="last-name"
-                name="last-name"
-                type="text"
-                autoComplete="family-name"
-                className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
-              />
-            </div>
-          </div>
+
           <div className="sm:col-span-2">
             <label htmlFor="email" className="block text-sm/6 font-semibold text-gray-900">
              Votre Email
@@ -61,7 +76,7 @@ export default function Example() {
             <div className="mt-2.5">
               <input
                 id="email"
-                name="email"
+                name='from_email'
                 type="email"
                 autoComplete="email"
                 className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
