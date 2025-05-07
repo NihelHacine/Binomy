@@ -6,7 +6,7 @@ const multer  = require('multer')
 const userRouter = express.Router();
 const {registerRules,loginRules,validation} = require("../middlewares/validator");
 const isAuth = require('../middlewares/passport');
-
+const path = require("path");
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, './files')
@@ -24,17 +24,18 @@ userRouter.post("/register",
   registerRules(),
   validation,
   async (req, res)=> {
-  const { nom, prenom, cin, tel, email, password, gouvernorat, adresse, code_postal, about, role } = req.body;
+  const { nom, prenom, cin, tel, email, password, gouvernorat,institut,age,niveau, adresse, code_postal, about, role } = req.body;
 
-  if (!req.file) {
-    return res.status(400).send({ msg: "photo is required" });
+ // Si le rôle est "etudiant", vérifie que la photo est présente
+  if (role === "etudiant" && !req.file) {
+    return res.status(400).send({ msg: "photo is required for etudiant" });
   }
 
-  const photoUrl = req.file.filename;
+  const photoUrl = req.file ? req.file.filename : null; // Si photo existe, on l'assigne
 
   try {
     const newuser = new User({
-      nom, prenom, cin, tel, email, password, gouvernorat, adresse, code_postal, about, photo: photoUrl, role
+      nom, prenom, cin, tel, email, password, gouvernorat,institut,age,niveau, adresse, code_postal, about, photo: photoUrl, role
     });
 
     const salt = 10;
@@ -112,18 +113,35 @@ userRouter.get("/current", isAuth(),(req,res) => {
 })
 
 //update user
-userRouter.put("/:_id", async (req, res) => {
-    try {
-      let result = await User.findByIdAndUpdate(
-        { _id: req.params._id },
-        { $set: req.body }
-      );
-      res.send({ msg: " user updated " });
-    } catch (error) {
-      res.send({ msg: "fail" });
-      console.log(error);
+userRouter.put("/:id", upload.single("photo"), async (req, res) => {
+  try {
+    const updateFields = { ...req.body };
+    if (req.file) {
+      updateFields.photo = req.file.filename;
     }
-  });
+    const updated = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
+    res.send({ msg: "Profil mis à jour", user: updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ msg: "Erreur serveur lors de la mise à jour" });
+  }
+});
+
+
+// ✅ Valider ou refuser un utilisateur
+userRouter.put('/validate/:id', async (req, res) => {
+  try {
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { etat: req.body.etat }, // "accepté", "refusé"
+      { new: true }
+    );
+    res.send({ msg: 'État mis à jour', user: updated });
+  } catch (err) {
+    res.status(500).send({ msg: 'Erreur serveur' });
+  }
+});
+
 
 //get allusers
 userRouter.get("/allusers", async (req, res) => {
@@ -136,14 +154,51 @@ userRouter.get("/allusers", async (req, res) => {
   }
 });
 
-//delete user 
-userRouter.delete("/:_id", async (req, res) => {
+
+// Route GET /user/filter
+userRouter.get('/filter', async (req, res) => {
   try {
-    let result = await User.findByIdAndDelete({ _id: req.params._id });
-    res.send({ msg: "user deleted " });
+    const { age, institut, about } = req.query;
+
+    // Construction dynamique du filtre
+    let filter = {
+      role: "etudiant",   // seuls les étudiants
+      etat: "accepté",    // uniquement ceux validés
+    };
+
+    if (age) filter.age = Number(age);
+    if (institut) filter.institut = institut;
+
+    if (about) {
+      filter.about = { $regex: about, $options: "i" }; // recherche insensible à la casse
+    }
+
+    const users = await User.find(filter).select('-password'); // on peut exclure password par sécurité
+    res.json({ users });
   } catch (error) {
-    res.send({ msg: "fail" });
-    console.log(error);
+    console.error("Erreur filtre users :", error);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+});
+
+
+
+//delete user 
+userRouter.delete("/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).send({ msg: "Utilisateur introuvable" });
+
+    // Supprimer photo associée si existe
+    if (user.photo) {
+      const filepath = path.join(__dirname, "..", "files", user.photo);
+      if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
+    }
+
+    res.send({ msg: "Utilisateur supprimé" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ msg: "Erreur serveur" });
   }
 });
 

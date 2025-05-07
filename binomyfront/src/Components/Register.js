@@ -13,29 +13,41 @@ export default function Register() {
     "email":"",
     "password":"",
     "gouvernorat":"",
+    "institut":"",
+    "age":"",
+    "niveau":"",
     "adresse":"",
     "code_postal":"",
     "about":"",
     "photo":"",
-    "role":""
+    "role":"etudiant"
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
   
     const formData = new FormData();
+
     formData.append("nom", newuser.nom);
     formData.append("prenom", newuser.prenom);
     formData.append("cin", newuser.cin);
     formData.append("tel", newuser.tel);
     formData.append("email", newuser.email);
     formData.append("password", newuser.password);
-    formData.append("gouvernorat", newuser.gouvernorat);
-    formData.append("adresse", newuser.adresse);
-    formData.append("code_postal", newuser.code_postal);
-    formData.append("about", newuser.about);
-    formData.append("photo", newuser.photo);
     formData.append("role", newuser.role);
+    
+    // Ajouter les autres champs uniquement si l'utilisateur est un étudiant
+    if (newuser.role === "etudiant") {
+      formData.append("gouvernorat", newuser.gouvernorat );
+      formData.append("institut", newuser.institut );
+      formData.append("age", newuser.age );
+      formData.append("niveau", newuser.niveau );
+      formData.append("adresse", newuser.adresse );
+      formData.append("code_postal", newuser.code_postal );
+      formData.append("about", newuser.about );
+      formData.append("photo", newuser.photo );
+    }
+    
   
     try {
       const result = await axios.post("http://localhost:5000/user/register", formData, {
@@ -118,7 +130,7 @@ export default function Register() {
               </label>
               <div className="mt-2">
                 <input
-                  id="last-name"
+                  id="cin"
                   name="cin"
                   type="number"
                   autoComplete="family-name"
@@ -127,6 +139,7 @@ export default function Register() {
                 />
               </div>
             </div>
+
             <div className="sm:col-span-3">
               <label htmlFor="last-name" className="block text-sm/6 font-medium text-gray-900">
                 Téléphone
@@ -141,9 +154,26 @@ export default function Register() {
                   onChange={(e)=>setnewuser({...newuser,tel:e.target.value})} required
                 />
               </div>
-              <div className="sm:col-span-3">
+            </div>
+
+            <div className="sm:col-span-4">
+              <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
+                Email 
+              </label>
+              <div className="mt-2">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,email:e.target.value})} required
+                />
+              </div>
+            </div>
+            <div className="sm:col-span-3">
               <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
-                Gouvernerat
+                Role
               </label>
               <div className="mt-2 grid grid-cols-1">
                 <select
@@ -163,23 +193,8 @@ export default function Register() {
                 />
               </div>
             </div>
-            </div>
-            <div className="sm:col-span-4">
-              <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">
-                Email 
-              </label>
-              <div className="mt-2">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  onChange={(e)=>setnewuser({...newuser,email:e.target.value})} required
-                />
-              </div>
-            </div>
-
+            {newuser.role === "etudiant" && (
+           <>
             <div className="sm:col-span-3">
               <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
                 Gouvernorat
@@ -225,6 +240,74 @@ export default function Register() {
               </div>
             </div>
 
+            <div className="sm:col-span-3">
+              <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
+                Institut
+              </label>
+              <div className="mt-2 grid grid-cols-1">
+                <select
+                  id="institut"
+                  name="institut"
+                  autoComplete="country-name"
+                  className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,institut:e.target.value})} required
+                >
+                  <option value="" disabled selected>-- Choisissez votre institut --</option>
+                  <option value="Institut supérieur de gestion">Institut supérieur de gestion </option>
+                  <option value="Institut supérieur des langues">Institut supérieur des langues</option>
+                  <option value="Institut supérieur des sciences et technologies">Institut supérieur des sciences et technologies</option>
+                  <option value="Institut supérieur des etudes juridiques">Institut supérieur des etudes juridiques</option>
+                  <option value="Faculté des sciences">Faculté des sciences</option>
+                  <option value="Ecole nationale d'ingenieurs">Ecole nationale d'ingenieurs</option>
+                </select>
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                />
+              </div>
+            </div>
+                   
+            <div className="sm:col-span-3">
+              <label htmlFor="country" className="block text-sm/6 font-medium text-gray-900">
+                Niveau d'études
+              </label>
+              <div className="mt-2 grid grid-cols-1">
+                <select
+                  id="niveau"
+                  name="niveau"
+                  autoComplete="niveau"
+                  className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-1.5 pr-8 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,niveau:e.target.value})} required
+                >
+                 <option value="" disabled selected>-- Selectionnez votre niveau d'études --</option>
+                <option value="Licence">Licence</option>
+                <option value="Master">Master</option>
+                <option value="Doctorat">Doctorat</option>
+                <option value="Ingeniorat">Ingeniorat</option>
+                </select>
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4"
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-3">
+              <label htmlFor="last-name" className="block text-sm/6 font-medium text-gray-900">
+                Age
+              </label>
+              <div className="mt-2">
+                <input
+                  id="age"
+                  name="age"
+                  type="number"
+                  autoComplete="family-name"
+                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                  onChange={(e)=>setnewuser({...newuser,age:e.target.value})} required
+                />
+              </div>
+            </div>
+      
             <div className="col-span-full">
               <label htmlFor="street-address" className="block text-sm/6 font-medium text-gray-900">
                 Adresse
@@ -241,8 +324,6 @@ export default function Register() {
               </div>
             </div>
 
-
-
             <div className="sm:col-span-2">
               <label htmlFor="postal-code" className="block text-sm/6 font-medium text-gray-900">
                 ZIP / Postal code
@@ -258,6 +339,8 @@ export default function Register() {
                 />
               </div>
             </div>
+          </>)}
+
             <div className="col-span-full">
               <label htmlFor="street-address" className="block text-sm/6 font-medium text-gray-900">
                 Mot de passe
@@ -277,8 +360,10 @@ export default function Register() {
             
           </div>
         </div>
+        </div>
+{newuser.role === "etudiant" && (
 
-
+<>
         <div className="col-span-full">
               <label htmlFor="about" className="block text-sm/6 font-medium text-gray-900">
                 A propos
@@ -295,7 +380,7 @@ export default function Register() {
               </div>
               <p className="mt-3 text-sm/6 text-gray-600">Écris quelques phrases sur toi.</p>
             </div>
-      </div>
+      
       
       <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
 
@@ -313,7 +398,7 @@ export default function Register() {
           className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500"
         >
          
-          <input id="file-upload" name="photo" type="file"  accept="image/*" required onChange={(e)=>setnewuser({...newuser,photo:e.target.files[0]})}/>
+          <input id="file-upload" name="photo" type="file"  accept="image/*" onChange={(e)=>setnewuser({...newuser,photo:e.target.files[0]})}/>
         </label>
        
       </div>
@@ -323,7 +408,7 @@ export default function Register() {
   </div>
 </div>
 </div>
-
+</>)}
       <div className="mt-6 flex items-center justify-end gap-x-6">
         <button type="reset" className="text-sm/6 font-semibold text-gray-900">
           Annuler
