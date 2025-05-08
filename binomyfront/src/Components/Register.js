@@ -5,6 +5,13 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 
 export default function Register() {
+  const isAuth = localStorage.getItem("token");
+  const navigate = useNavigate()
+  useEffect(() => {
+    if (isAuth){
+      navigate('/');
+    }
+  }, [])
   const [newuser, setnewuser] = useState({
     "nom": "",
     "prenom" :"",
